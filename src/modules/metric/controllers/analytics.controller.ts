@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { AnalyticsService } from '../services/metric.service';
 import { MetricsFilterDto } from '../dto/metrics-filter.dto';
 
-@Controller('analytics')
+@Controller('api/v1/analytics')
 export class AnalyticsController {
   constructor(private service: AnalyticsService) {}
 
