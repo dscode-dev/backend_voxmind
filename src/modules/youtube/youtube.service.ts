@@ -6,12 +6,16 @@ import * as fs from 'node:fs';
 export class YoutubeService {
   private readonly logger = new Logger(YoutubeService.name);
 
-  async uploadShort(oauth2Client: any, filePath: string, input: {
-    title: string;
-    description?: string;
-    tags?: string[];
-    madeForKids?: boolean;
-  }): Promise<{ videoId: string }> {
+  async uploadShort(
+    oauth2Client: any,
+    filePath: string,
+    input: {
+      title: string;
+      description?: string;
+      tags?: string[];
+      madeForKids?: boolean;
+    },
+  ): Promise<{ videoId: string }> {
     const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
     const stats = fs.statSync(filePath);
     if (!stats.isFile()) throw new Error(`Arquivo não encontrado: ${filePath}`);
@@ -51,13 +55,17 @@ export class YoutubeService {
     return { videoId };
   }
 
-  async fetchDailyAnalytics(oauth2Client: any, channelId: string, dateISO: string) {
+  async fetchDailyAnalytics(
+    oauth2Client: any,
+    channelId: string,
+    dateISO: string,
+  ) {
     const yta = google.youtubeAnalytics('v2');
     // docs: https://developers.google.com/youtube/analytics/reference/reports/query
     const res = await yta.reports.query({
       auth: oauth2Client,
       ids: 'channel==MINE', // com refresh_token, MINE funciona para o canal autenticado
-      startDate: dateISO,   // '2025-11-06'
+      startDate: dateISO, // '2025-11-06'
       endDate: dateISO,
       metrics: 'views,likes,comments,estimatedMinutesWatched,estimatedRevenue',
       dimensions: 'day',
@@ -74,5 +82,47 @@ export class YoutubeService {
       watch_minutes: Number(minutes || 0),
       revenue_usd: Number(revenue || 0),
     };
+  }
+
+  async listTrending(
+    oauth2Client: any,
+    params: {
+      regionCode: string; // ex: 'BR', 'US'
+      maxResults?: number; // 5..50
+      videoCategoryId?: string; // ex: '0' (all). Deixe undefined para tudo.
+    },
+  ): Promise<
+    Array<{
+      videoId: string;
+      title: string;
+      description: string;
+      tags: string[];
+      channelId: string;
+      channelTitle: string;
+      publishedAt: string; // ISO
+    }>
+  > {
+    const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
+    const res = await youtube.videos.list({
+      part: ['snippet', 'contentDetails', 'statistics'],
+      chart: 'mostPopular',
+      regionCode: params.regionCode,
+      maxResults: Math.min(Math.max(params.maxResults ?? 20, 5), 50),
+      videoCategoryId: params.videoCategoryId, // opcional
+    });
+
+    const items = res.data.items ?? [];
+    return items.map((it) => {
+      const sn = it.snippet!;
+      return {
+        videoId: it.id!,
+        title: sn.title || '',
+        description: sn.description || '',
+        tags: (sn.tags || []).slice(0, 10),
+        channelId: sn.channelId || '',
+        channelTitle: sn.channelTitle || '',
+        publishedAt: sn.publishedAt || '',
+      };
+    });
   }
 }

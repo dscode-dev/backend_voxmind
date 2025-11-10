@@ -5,7 +5,7 @@ import { CreateCampaignDto } from '../dto/create-campaign.dto';
 import { UpdateCampaignDto } from '../dto/update-campaign.dto';
 
 
-@Controller('campaigns')
+@Controller('api/v1/campaigns')
 export class CampaignsController {
   constructor(private service: CampaignsService) {}
 

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { FinanceModule } from './modules/finance/finance.module';
@@ -15,10 +15,15 @@ import { JobsModule } from './modules/job/job.module';
 import { AnalyticsModule } from './modules/metric/metric.module';
 import { ElevenLabsModule } from './modules/elevenlabs/elevenlabs.module';
 import { RenderModule } from './modules/render/render.module';
-import { SchedulerModule } from './modules/scheduler/scheduler.module';
 import { MediaModule } from './modules/media/media.module';
 import { TelegramModule } from './modules/telegram/telegram.module';
-
+import { CorrelationIdMiddleware } from './common/middlewares/correlation-id.middleware';
+import { TrendsModule } from './modules/trend/trend.module';
+import { AutoModule } from './modules/auto/auto.module';
+import { IaModule } from './modules/ia/ia.module';
+import { PexelsModule } from './modules/pexels/pexels.module';
+import { PipelineModule } from './modules/pipeline/pipeline.module';
+import { AppScheduleModule } from './modules/scheduler/scheduler.module';
 
 @Module({
   imports: [
@@ -36,11 +41,20 @@ import { TelegramModule } from './modules/telegram/telegram.module';
     YoutubeModule,
     ElevenLabsModule,
     RenderModule,
-    SchedulerModule,
+    AppScheduleModule,
     MediaModule,
     TelegramModule,
+    TrendsModule,
+    AutoModule,
+    IaModule,
+    PexelsModule,
+    PipelineModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CorrelationIdMiddleware).forRoutes('*');
+  }
+}

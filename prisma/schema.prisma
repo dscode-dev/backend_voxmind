@@ -25,55 +25,63 @@ model User {
 }
 
 model Campaign {
-  id            Int      @id @default(autoincrement())
-  name          String
-  niche         String
-  language      String
-  platform      String 
-  isActive      Boolean  @default(true) @map("is_active")
-  dailyQuota    Int      @default(20) @map("daily_quota")
-  maxLengthSec  Int     @default(60) @map("max_length_sec")
-  stylePrompt   String   @default("") @map("style_prompt")
-  cpmOverride   Float? @map("cpm_override")
-
-  contents      Content[]
+  id           Int       @id @default(autoincrement())
+  name         String
+  niche        String
+  language     String
+  platform     String
+  isActive     Boolean   @default(true) @map("is_active")
+  dailyQuota   Int       @default(20) @map("daily_quota")
+  maxLengthSec Int       @default(60) @map("max_length_sec")
+  stylePrompt  String    @default("") @map("style_prompt")
+  cpmOverride  Float?    @map("cpm_override")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  createdBy    String?   @default("") @map("created_by")
+  contents     Content[]
 }
 
 model Content {
-  id                 Int     @id @default(autoincrement())
-  campaign_id        Int
-  title              String
-  script_text        String  @default("")
-  voice_path         String?
-  video_path         String?
-  platform_video_id  String?
-  tags               String  @default("")
-
+  id                  Int      @id @default(autoincrement())
+  campaign_id         Int
+  title               String
+  script_text         String   @default("")
+  voice_path          String?
+  video_path          String?
+  platform_video_id   String?
+  tags                String   @default("")
+  context             String?
+  sentences           Json?
+  pexels_query        String?
+  image_assets        String?
   // strings, sem enum
-  status             String  @default("planned")   
-  approval_status    String  @default("pending")  
-  review_source      String?                      
-  review_message     String?
+  status              String   @default("planned")
+  approval_status     String   @default("pending")
+  review_source       String?
+  review_message      String?
   telegram_message_id String?
-  preview_caption    String  @default("")
+  preview_caption     String   @default("")
+  createdAt           DateTime @default(now()) @map("created_at")
+  createdBy           String?  @default("") @map("created_by")
 
-  campaign           Campaign @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
-  jobs               Job[]
+  campaign Campaign @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+  jobs     Job[]
 }
 
 model Job {
-  id         Int     @id @default(autoincrement())
-  type       String  
-  status     String  @default("queued") 
+  id         Int      @id @default(autoincrement())
+  type       String
+  status     String   @default("queued")
   content_id Int?
   error      String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  createdBy  String?  @default("") @map("created_by")
 
-  content    Content? @relation(fields: [content_id], references: [id], onDelete: SetNull)
+  content Content? @relation(fields: [content_id], references: [id], onDelete: SetNull)
 }
 
 model MetricDaily {
   id            Int      @id @default(autoincrement())
-  platform      String  
+  platform      String
   channel_id    String
   date          DateTime
   views         Int      @default(0)
@@ -82,6 +90,8 @@ model MetricDaily {
   watch_minutes Float    @default(0)
   revenue_usd   Float    @default(0)
   revenue_brl   Float    @default(0)
+  createdAt     DateTime @default(now()) @map("created_at")
+  createdBy     String?  @default("") @map("created_by")
 
   @@unique([platform, channel_id, date])
 }
@@ -94,4 +104,6 @@ model FinanceSnapshot {
   costs_api         Float    @default(0)
   costs_infra       Float    @default(0)
   profit            Float    @default(0)
+  createdAt         DateTime @default(now()) @map("created_at")
+  createdBy         String?  @default("") @map("created_by")
 }

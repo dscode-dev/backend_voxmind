@@ -4,7 +4,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import type { Request, Response } from 'express';
 
-@Controller('media')
+@Controller('api/v1/media')
 export class MediaController {
   constructor(private media: MediaService) {}
 

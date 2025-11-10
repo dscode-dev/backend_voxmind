@@ -3,7 +3,7 @@ import { ContentsService } from '../services/content.service';
 import { CreateContentDto } from '../dto/create-content.dto';
 import { FilterContentsDto } from '../dto/filter-contents.dto';
 
-@Controller('contents')
+@Controller('api/v1/contents')
 export class ContentsController {
   constructor(private service: ContentsService) {}
 

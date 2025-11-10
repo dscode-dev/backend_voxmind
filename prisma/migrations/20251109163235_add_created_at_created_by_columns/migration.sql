@@ -1,0 +1,19 @@
+-- AlterTable
+ALTER TABLE "Campaign" ADD COLUMN     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "created_by" TEXT DEFAULT '';
+
+-- AlterTable
+ALTER TABLE "Content" ADD COLUMN     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "created_by" TEXT DEFAULT '';
+
+-- AlterTable
+ALTER TABLE "FinanceSnapshot" ADD COLUMN     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "created_by" TEXT DEFAULT '';
+
+-- AlterTable
+ALTER TABLE "Job" ADD COLUMN     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "created_by" TEXT DEFAULT '';
+
+-- AlterTable
+ALTER TABLE "MetricDaily" ADD COLUMN     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "created_by" TEXT DEFAULT '';

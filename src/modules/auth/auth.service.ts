@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../providers/prisma/prisma.service';
@@ -17,7 +17,7 @@ export class AuthService {
     if (!user) throw new Error('Username not found');
 
     const valid = await bcrypt.compare(payload.password, user.passwordHash);
-    if (!valid) throw new Error('Invalid username or password');
+    if (!valid) throw new HttpException('Invalid username or password', HttpStatus.UNAUTHORIZED);
 
     const accessToken = this.jwtService.sign({
       sub: user.id,

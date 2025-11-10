@@ -1,34 +1,33 @@
-import { Module, OnModuleInit } from '@nestjs/common';
-import * as cron from 'node-cron';
-import { JobsService } from '../job/services/job.service';
-import { PrismaModule } from 'src/providers/prisma/prisma.module';
-import { JobsModule } from '../job/job.module';
-import { YoutubeModule } from '../youtube/youtube.module';
-import { ElevenLabsModule } from '../elevenlabs/elevenlabs.module';
-import { RenderModule } from '../render/render.module';
+import { forwardRef, Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
+import { AutoRunnerService } from '../auto/auto.service';
+import { AutoModule } from '../auto/auto.module';
+import { Logger } from '@nestjs/common';
 
 @Module({
-  imports: [
-    PrismaModule,
-    JobsModule,
-    YoutubeModule,
-    ElevenLabsModule,
-    RenderModule,
-  ],
-  providers: [JobsService],
-})
-export class SchedulerModule implements OnModuleInit {
-  constructor(private jobs: JobsService) {}
+  imports: [ScheduleModule.forRoot(), AutoModule],
+  providers: [
+    {
+      provide: 'SCHEDULE_RUNNER',
+      useFactory: (autoRunner: AutoRunnerService) => {
+        const logger = new Logger('ScheduleRunner');
+        const enabled =
+          (process.env.AUTO_RUN_ENABLED ?? 'true').toLowerCase() === 'true';
 
-  onModuleInit() {
-    // 06:00, 12:00, 18:00, 23:00 America/Recife
-    cron.schedule(
-      '0 6,12,18,23 * * *',
-      async () => {
-        await this.jobs.generateDaily();
-        // aqui você pode encadear voice/render automáticos se quiser
+        if (!enabled) {
+          logger.warn(
+            '⏸️ Auto-run desativado via .env (AUTO_RUN_ENABLED=false)',
+          );
+          return null;
+        }
+
+        // dispara o cron configurado internamente no AutoRunner
+        logger.log('✅ ScheduleModule iniciado — cron ativo');
+        return autoRunner;
       },
-      { timezone: 'America/Recife' },
-    );
-  }
-}
+      inject: [AutoRunnerService],
+    },
+  ],
+  exports: [],
+})
+export class AppScheduleModule {}

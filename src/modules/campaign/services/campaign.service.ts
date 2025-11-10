@@ -26,6 +26,6 @@ export class CampaignsService {
   /** Soft-delete: marca como inativa e retorna a campanha */
   async softDelete(id: number) {
     await this.get(id);
-    return await this.repo.update(id, { is_active: false });
+    return await this.repo.update(id, { isActive: false });
   }
 }

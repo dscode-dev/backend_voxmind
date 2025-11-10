@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { FinanceService } from '../services/finance.service';
 import { FinanceFilterDto } from '../dto/finance-filter.dto';
 
-@Controller('finance')
+@Controller('api/v1/finance')
 export class FinanceController {
   constructor(private service: FinanceService) {}
 

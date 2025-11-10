@@ -36,7 +36,7 @@ export class AuthController {
 
   @Post('logout')
   async logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('access_token', {
+    res.clearCookie('auth_token', {
       httpOnly: true,
       sameSite: 'lax',
       path: '/',

@@ -1,14 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ContentsRepository } from '../contents.repository';
 import { CampaignsService } from 'src/modules/campaign/services/campaign.service';
+import { TelegramService } from 'src/modules/telegram/telegram.service';
 
 @Injectable()
 export class ContentsService {
-  constructor(private repo: ContentsRepository, private campaigns: CampaignsService) {}
+  constructor(
+    private repo: ContentsRepository,
+    private campaigns: CampaignsService,
+    private telegramService: TelegramService,
+  ) {}
 
   async create(data: any) {
     await this.campaigns.get(data.campaign_id);
-    return await this.repo.create({
+    const content = await this.repo.create({
       ...data,
       status: 'planned',
       approval_status: 'pending',
@@ -16,6 +21,14 @@ export class ContentsService {
       script_text: data.script_text ?? '',
       preview_caption: '',
     });
+
+    if (content)
+      this.telegramService.sendApprovalRequest({
+        id: content.id,
+        title: content.title,
+      });
+
+    return content;
   }
 
   async get(id: number) {
@@ -24,17 +37,30 @@ export class ContentsService {
     return c;
   }
 
-  async list(filter: { status?: string; approval?: string; campaign_id?: number; offset: number; limit: number; }) {
+  async list(filter: {
+    status?: string;
+    approval?: string;
+    campaign_id?: number;
+    offset: number;
+    limit: number;
+  }) {
     return await this.repo.list(filter);
   }
 
   async approve(id: number) {
     await this.get(id);
-    return await this.repo.update(id, { approval_status: 'approved', review_source: 'frontend' });
+    return await this.repo.update(id, {
+      approval_status: 'approved',
+      review_source: 'frontend',
+    });
   }
 
   async reject(id: number, message?: string) {
     await this.get(id);
-    return await this.repo.update(id, { approval_status: 'rejected', review_source: 'frontend', review_message: message ?? null });
+    return await this.repo.update(id, {
+      approval_status: 'rejected',
+      review_source: 'frontend',
+      review_message: message ?? null,
+    });
   }
 }
